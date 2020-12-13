@@ -72,6 +72,12 @@ pub struct DateTime<Tz: TimeZone> {
     offset: Tz::Offset,
 }
 
+impl Default for DateTime<Utc>{
+    fn default() -> DateTime<Utc> {
+        DateTime { datetime: naive::MIN_DATETIME, offset: Utc }
+    }
+}
+
 /// The minimum possible `DateTime<Utc>`.
 pub const MIN_DATETIME: DateTime<Utc> = DateTime { datetime: naive::MIN_DATETIME, offset: Utc };
 /// The maximum possible `DateTime<Utc>`.

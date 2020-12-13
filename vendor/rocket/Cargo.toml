@@ -58,6 +58,9 @@ version = "0.1"
 [dependencies.toml]
 version = "0.4.7"
 
+[dependencies.uuid]
+version = "0.8.1"
+
 [dependencies.yansi]
 version = "0.5"
 [build-dependencies.version_check]

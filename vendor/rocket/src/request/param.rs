@@ -281,6 +281,20 @@ impl<'a, T: FromParam<'a>> FromParam<'a> for Option<T> {
     }
 }
 
+extern crate uuid;
+use self::uuid::Uuid;
+use self::uuid::Error as ParseError;
+impl<'a> FromParam<'a> for Uuid {
+    type Error = ParseError;
+    /// A value is successfully parsed if `param` is a properly formatted Uuid.
+    /// Otherwise, a `ParseError` is returned.
+    #[inline(always)]
+    fn from_param(param: &'a RawStr) -> Result<Uuid, Self::Error> {
+        param.parse()
+    }
+}
+
+
 /// Trait to convert _many_ dynamic path segment strings to a concrete value.
 ///
 /// This is the `..` analog to [`FromParam`], and its functionality is identical

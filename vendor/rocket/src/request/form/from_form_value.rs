@@ -276,3 +276,16 @@ impl<'v, T: FromFormValue<'v>> FromFormValue<'v> for Result<T, T::Error> {
         }
     }
 }
+
+extern crate uuid;
+use self::uuid::Uuid;
+impl<'v> FromFormValue<'v> for Uuid {
+    type Error = &'v RawStr;
+    /// A value is successfully parsed if `form_value` is a properly formatted
+    /// Uuid. Otherwise, the raw form value is returned.
+    #[inline(always)]
+    fn from_form_value(form_value: &'v RawStr) -> Result<Uuid, &'v RawStr> {
+        form_value.parse().map_err(|_| form_value)
+    }
+}
+
