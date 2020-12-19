@@ -424,6 +424,21 @@ impl<T: UriDisplay<Query>, E> UriDisplay<Query> for Result<T, E> {
     }
 }
 
+extern crate uuid;
+use self::uuid::Uuid;
+impl UriDisplay<Path> for Uuid {
+    #[inline(always)]
+    fn fmt(&self, f: &mut Formatter<Path>) -> fmt::Result {
+        f.write_value(&format!("{}", self))
+    }
+}
+impl UriDisplay<Query> for Uuid {
+    #[inline(always)]
+    fn fmt(&self, f: &mut Formatter<Query>) -> fmt::Result {
+        f.write_value(&format!("{}", self))
+    }
+}
+
 // And finally, the `Ignorable` trait, which has sugar of `_` in the `uri!`
 // macro, which expands to a typecheck.
 

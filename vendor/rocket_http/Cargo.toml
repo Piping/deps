@@ -60,6 +60,9 @@ version = "0.1"
 [dependencies.unicode-xid]
 version = "0.1"
 
+[dependencies.uuid]
+version = "0.8"
+
 [features]
 default = []
 private-cookies = ["cookie/secure"]

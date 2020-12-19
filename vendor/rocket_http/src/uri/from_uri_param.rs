@@ -357,3 +357,8 @@ impl<P: UriPart, A, E, T: FromUriParam<P, A>> FromUriParam<P, A> for Result<T, E
         T::from_uri_param(param)
     }
 }
+
+extern crate uuid;
+use self::uuid::Uuid;
+impl_from_uri_param_identity!([uri::Path] Uuid);
+impl_from_uri_param_identity!([uri::Query] Uuid);
