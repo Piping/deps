@@ -6,12 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[cfg(feature = "heapsize")] use heapsize::HeapSizeOf;
-use host::Host;
+use crate::host::Host;
+use crate::parser::default_port;
+use crate::Url;
 use idna::domain_to_unicode;
-use parser::default_port;
-use std::sync::atomic::{AtomicUsize, ATOMIC_USIZE_INIT, Ordering};
-use Url;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub fn url_origin(url: &Url) -> Origin {
     let scheme = url.scheme();
@@ -20,16 +19,17 @@ pub fn url_origin(url: &Url) -> Origin {
             let result = Url::parse(url.path());
             match result {
                 Ok(ref url) => url_origin(url),
-                Err(_)  => Origin::new_opaque()
+                Err(_) => Origin::new_opaque(),
             }
-        },
-        "ftp" | "gopher" | "http" | "https" | "ws" | "wss" => {
-            Origin::Tuple(scheme.to_owned(), url.host().unwrap().to_owned(),
-                url.port_or_known_default().unwrap())
-        },
+        }
+        "ftp" | "http" | "https" | "ws" | "wss" => Origin::Tuple(
+            scheme.to_owned(),
+            url.host().unwrap().to_owned(),
+            url.port_or_known_default().unwrap(),
+        ),
         // TODO: Figure out what to do if the scheme is a file
         "file" => Origin::new_opaque(),
-        _ => Origin::new_opaque()
+        _ => Origin::new_opaque(),
     }
 }
 
@@ -44,7 +44,7 @@ pub fn url_origin(url: &Url) -> Origin {
 /// - If the scheme is "blob" the origin is the origin of the
 ///   URL contained in the path component. If parsing fails,
 ///   it is an opaque origin.
-/// - If the scheme is "ftp", "gopher", "http", "https", "ws", or "wss",
+/// - If the scheme is "ftp", "http", "https", "ws", or "wss",
 ///   then the origin is a tuple of the scheme, host, and port.
 /// - If the scheme is anything else, the origin is opaque, meaning
 ///   the URL does not have the same origin as any other URL.
@@ -56,27 +56,13 @@ pub enum Origin {
     Opaque(OpaqueOrigin),
 
     /// Consists of the URL's scheme, host and port
-    Tuple(String, Host<String>, u16)
+    Tuple(String, Host<String>, u16),
 }
-
-#[cfg(feature = "heapsize")]
-impl HeapSizeOf for Origin {
-    fn heap_size_of_children(&self) -> usize {
-        match *self {
-            Origin::Tuple(ref scheme, ref host, _) => {
-                scheme.heap_size_of_children() +
-                host.heap_size_of_children()
-            },
-            _ => 0,
-        }
-    }
-}
-
 
 impl Origin {
     /// Creates a new opaque origin that is only equal to itself.
     pub fn new_opaque() -> Origin {
-        static COUNTER: AtomicUsize = ATOMIC_USIZE_INIT;
+        static COUNTER: AtomicUsize = AtomicUsize::new(0);
         Origin::Opaque(OpaqueOrigin(COUNTER.fetch_add(1, Ordering::SeqCst)))
     }
 
@@ -110,7 +96,7 @@ impl Origin {
                         let (domain, _errors) = domain_to_unicode(domain);
                         Host::Domain(domain)
                     }
-                    _ => host.clone()
+                    _ => host.clone(),
                 };
                 if default_port(scheme) == Some(port) {
                     format!("{}://{}", scheme, host)
@@ -125,6 +111,3 @@ impl Origin {
 /// Opaque identifier for URLs that have file or other schemes
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub struct OpaqueOrigin(usize);
-
-#[cfg(feature = "heapsize")]
-known_heap_size!(0, OpaqueOrigin);
